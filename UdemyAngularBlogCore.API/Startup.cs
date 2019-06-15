@@ -20,6 +20,14 @@ namespace UdemyAngularBlogCore.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(opts =>
+            {
+                opts.AddDefaultPolicy(x =>
+                {
+                    x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                });
+            });
+
             services.AddDbContext<UdemyAngularBlogDBContext>(opts =>
             {
                 opts.UseSqlServer(Configuration["ConnectionStrings:DefaultSqlConnectionString"]);
@@ -41,6 +49,8 @@ namespace UdemyAngularBlogCore.API
                 app.UseHsts();
             }
 
+            app.UseCors();
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseMvc();
         }
