@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using UdemyAngularBlogCore.API.Models;
+using UdemyAngularBlogCore.API.Responses;
 
 namespace UdemyAngularBlogCore.API.Controllers
 {
@@ -15,16 +14,55 @@ namespace UdemyAngularBlogCore.API.Controllers
     {
         private readonly UdemyAngularBlogDBContext _context;
 
+        //api/articles
         public ArticlesController(UdemyAngularBlogDBContext context)
         {
             _context = context;
         }
 
-        // GET: api/Articles
+        // GET: api/Articles/1/5
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Article>>> GetArticle()
         {
             return await _context.Article.ToListAsync();
+        }
+
+        [HttpGet("{page}/{pageSize}")]
+        public IActionResult GetArticle(int page = 1, int pageSize = 5)
+        {
+            try
+            {
+                IQueryable<Article> query;
+
+                query = _context.Article.Include(x => x.Category).Include(y => y.Comment).OrderByDescending(z => z.PublishDate);
+
+                int totalCount = query.Count();
+
+                // 5*(1-1) => 0
+                //5*(2-1)=>5
+                var articlesResponse = query.Skip((pageSize * (page - 1))).Take(5).ToList().Select(x => new ArticleResponse()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    ContentMain = x.ContentMain,
+                    ContentSummary = x.ContentSummary,
+                    Picture = x.Picture,
+                    ViewCount = x.ViewCount,
+                    CommentCount = x.Comment.Count,
+                    Category = new CategoryResponse() { Id = x.Category.Id, Name = x.Category.Name }
+                });
+
+                var result = new
+                {
+                    TotalCount = totalCount,
+                    Articles = articlesResponse
+                };
+                return Ok(result);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: api/Articles/5

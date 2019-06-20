@@ -23,6 +23,8 @@ namespace UdemyAngularBlogCore.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategory()
         {
+            System.Threading.Thread.Sleep(3000);
+
             return await _context.Category.ToListAsync();
         }
 
