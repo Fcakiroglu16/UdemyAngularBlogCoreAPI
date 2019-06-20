@@ -30,6 +30,8 @@ namespace UdemyAngularBlogCore.API.Controllers
         [HttpGet("{page}/{pageSize}")]
         public IActionResult GetArticle(int page = 1, int pageSize = 5)
         {
+            System.Threading.Thread.Sleep(3000);
+
             try
             {
                 IQueryable<Article> query;
@@ -67,16 +69,28 @@ namespace UdemyAngularBlogCore.API.Controllers
 
         // GET: api/Articles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Article>> GetArticle(int id)
+        public IActionResult GetArticle(int id)
         {
-            var article = await _context.Article.FindAsync(id);
+            var article = _context.Article.Include(x => x.Category).Include(y => y.Comment).FirstOrDefault(z => z.Id == id);
 
             if (article == null)
             {
                 return NotFound();
             }
+            ArticleResponse articleResponse = new ArticleResponse()
+            {
+                Id = article.Id,
+                Title = article.Title,
+                ContentMain = article.ContentMain,
+                ContentSummary = article.ContentSummary,
+                Picture = article.Picture,
+                PublishDate = article.PublishDate,
+                ViewCount = article.ViewCount,
+                Category = new CategoryResponse() { Id = article.Category.Id, Name = article.Category.Name },
+                CommentCount = article.Comment.Count
+            };
 
-            return article;
+            return Ok(articleResponse);
         }
 
         // PUT: api/Articles/5
