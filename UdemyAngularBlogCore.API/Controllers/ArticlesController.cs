@@ -67,10 +67,29 @@ namespace UdemyAngularBlogCore.API.Controllers
             }
         }
 
+        //localhost/api/articles/GetArticlesWithCategory/2/1/5
+        [HttpGet]
+        [Route("GetArticlesWithCategory/{categoryId}/{page}/{pageSize}")]
+        public IActionResult GetArticlesWithCategory(int categoryId, int page = 1, int pageSize = 5)
+        {
+            IQueryable<Article> query = _context.Article.Include(x => x.Category).Include(y => y.Comment).Where(z => z.CategoryId == categoryId).OrderByDescending(x => x.PublishDate);
+
+            var queryResult = ArticlesPagination(query, page, pageSize);
+
+            var result = new
+            {
+                TotalCount = queryResult.Item2,
+                Articles = queryResult.Item1
+            };
+            return Ok(result);
+        }
+
         // GET: api/Articles/5
         [HttpGet("{id}")]
         public IActionResult GetArticle(int id)
         {
+            System.Threading.Thread.Sleep(2000);
+
             var article = _context.Article.Include(x => x.Category).Include(y => y.Comment).FirstOrDefault(z => z.Id == id);
 
             if (article == null)
@@ -152,6 +171,25 @@ namespace UdemyAngularBlogCore.API.Controllers
         private bool ArticleExists(int id)
         {
             return _context.Article.Any(e => e.Id == id);
+        }
+
+        public System.Tuple<IEnumerable<ArticleResponse>, int> ArticlesPagination(IQueryable<Article> query, int page, int pageSize)
+        {
+            int totalCount = query.Count();
+
+            var articlesResponse = query.Skip((pageSize * (page - 1))).Take(5).ToList().Select(x => new ArticleResponse()
+            {
+                Id = x.Id,
+                Title = x.Title,
+                ContentMain = x.ContentMain,
+                ContentSummary = x.ContentSummary,
+                Picture = x.Picture,
+                ViewCount = x.ViewCount,
+                CommentCount = x.Comment.Count,
+                Category = new CategoryResponse() { Id = x.Category.Id, Name = x.Category.Name }
+            });
+
+            return new System.Tuple<IEnumerable<ArticleResponse>, int>(articlesResponse, totalCount);
         }
     }
 }
