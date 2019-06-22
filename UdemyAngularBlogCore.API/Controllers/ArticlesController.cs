@@ -103,6 +103,20 @@ namespace UdemyAngularBlogCore.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("GetArticlesByMostView")]
+        public IActionResult GetArticlesByMostView()
+        {
+            System.Threading.Thread.Sleep(2000);
+            var articles = _context.Article.OrderByDescending(x => x.ViewCount).Take(5).Select(x => new ArticleResponse()
+            {
+                Title = x.Title,
+                Id = x.Id
+            });
+
+            return Ok(articles);
+        }
+
         // GET: api/Articles/5
         [HttpGet("{id}")]
         public IActionResult GetArticle(int id)
