@@ -84,6 +84,25 @@ namespace UdemyAngularBlogCore.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("SearchArticles/{searchText}/{page}/{pageSize}")]
+        public IActionResult SearchArticles(string searchText, int page = 1, int pageSize = 5)
+        {
+            IQueryable<Article> query;
+
+            query = _context.Article.Include(x => x.Category).Include(y => y.Comment).Where(z => z.Title.Contains(searchText)).OrderByDescending(f => f.PublishDate);
+
+            var resultQuery = ArticlesPagination(query, page, pageSize);
+
+            var result = new
+            {
+                Articles = resultQuery.Item1,
+                TotalCount = resultQuery.Item2
+            };
+
+            return Ok(result);
+        }
+
         // GET: api/Articles/5
         [HttpGet("{id}")]
         public IActionResult GetArticle(int id)
@@ -175,9 +194,11 @@ namespace UdemyAngularBlogCore.API.Controllers
 
         public System.Tuple<IEnumerable<ArticleResponse>, int> ArticlesPagination(IQueryable<Article> query, int page, int pageSize)
         {
+            System.Threading.Thread.Sleep(1500);
+
             int totalCount = query.Count();
 
-            var articlesResponse = query.Skip((pageSize * (page - 1))).Take(5).ToList().Select(x => new ArticleResponse()
+            var articlesResponse = query.Skip((pageSize * (page - 1))).Take(pageSize).ToList().Select(x => new ArticleResponse()
             {
                 Id = x.Id,
                 Title = x.Title,
