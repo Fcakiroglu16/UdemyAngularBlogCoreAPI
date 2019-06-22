@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using UdemyAngularBlogCore.API.Models;
@@ -115,6 +117,23 @@ namespace UdemyAngularBlogCore.API.Controllers
             });
 
             return Ok(articles);
+        }
+
+        [HttpGet]
+        [Route("GetArticlesArchive")]
+        public IActionResult GetArticlesArchive()
+        {
+            System.Threading.Thread.Sleep(1000);
+            var query = _context.Article.GroupBy(x => new { x.PublishDate.Year, x.PublishDate.Month }).Select(y =>
+                 new
+                 {
+                     year = y.Key.Year,
+                     month = y.Key.Month,
+                     count = y.Count(),
+                     monthName = new DateTime(y.Key.Year, y.Key.Month, 1).ToString("MMMM", CultureInfo.CreateSpecificCulture("tr"))
+                 });
+
+            return Ok(query);
         }
 
         // GET: api/Articles/5
