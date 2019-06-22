@@ -245,6 +245,16 @@ namespace UdemyAngularBlogCore.API.Controllers
             return _context.Article.Any(e => e.Id == id);
         }
 
+        [Route("ArticleViewCountUp/{id}")]
+        [HttpGet()]
+        public IActionResult ArticleViewCountUp(int id)
+        {
+            Article article = _context.Article.Find(id);
+            article.ViewCount += 1;
+            _context.SaveChanges();
+            return Ok();
+        }
+
         public System.Tuple<IEnumerable<ArticleResponse>, int> ArticlesPagination(IQueryable<Article> query, int page, int pageSize)
         {
             System.Threading.Thread.Sleep(1500);
