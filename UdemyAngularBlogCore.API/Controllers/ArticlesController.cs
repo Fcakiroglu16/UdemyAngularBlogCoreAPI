@@ -229,12 +229,12 @@ namespace UdemyAngularBlogCore.API.Controllers
 
         // POST: api/Articles
         [HttpPost]
-        public async Task<ActionResult<Article>> PostArticle(Article article)
+        public async Task<IActionResult> PostArticle(Article article)
         {
             _context.Article.Add(article);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetArticle", new { id = article.Id }, article);
+            return Ok();
         }
 
         // DELETE: api/Articles/5
