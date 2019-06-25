@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UdemyAngularBlogCore.API.Models;
@@ -285,6 +287,26 @@ namespace UdemyAngularBlogCore.API.Controllers
             });
 
             return new System.Tuple<IEnumerable<ArticleResponse>, int>(articlesResponse, totalCount);
+        }
+
+        [HttpPost]
+        [Route("SaveArticlePicture")]
+        public async Task<IActionResult> SaveArticlePicture(IFormFile picture)
+        {
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(picture.FileName);
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/articlePictures", fileName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await picture.CopyToAsync(stream);
+            };
+            var result = new
+            {
+                path = "https://" + Request.Host + "/articlePictures/" + fileName
+            };
+
+            return Ok(result);
         }
     }
 }
