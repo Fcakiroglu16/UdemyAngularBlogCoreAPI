@@ -24,9 +24,20 @@ namespace UdemyAngularBlogCore.API.Controllers
 
         // GET: api/Articles/1/5
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticle()
+        public IActionResult GetArticle()
         {
-            return await _context.Article.ToListAsync();
+            var articles = _context.Article.Include(a => a.Category).Include(b => b.Comment).OrderByDescending(x => x.PublishDate).ToList().Select(y => new ArticleResponse()
+            {
+                Id = y.Id,
+                Title = y.Title,
+                Picture = y.Picture,
+                Category = new CategoryResponse() { Id = y.Category.Id, Name = y.Category.Name },
+                CommentCount = y.Comment.Count,
+
+                ViewCount = y.ViewCount,
+                PublishDate = y.PublishDate
+            });
+            return Ok(articles);
         }
 
         [HttpGet("{page}/{pageSize}")]
