@@ -231,6 +231,14 @@ namespace UdemyAngularBlogCore.API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostArticle(Article article)
         {
+            if (article.Category != null)
+            {
+                article.CategoryId = article.Category.Id;
+            }
+            article.Category = null;
+            article.ViewCount = 0;
+            article.PublishDate = DateTime.Now;
+
             _context.Article.Add(article);
             await _context.SaveChangesAsync();
 
