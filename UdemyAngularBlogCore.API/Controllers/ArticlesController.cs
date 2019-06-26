@@ -201,12 +201,13 @@ namespace UdemyAngularBlogCore.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutArticle(int id, Article article)
         {
-            if (id != article.Id)
-            {
-                return BadRequest();
-            }
+            Article firstArticle = _context.Article.Find(id);
 
-            _context.Entry(article).State = EntityState.Modified;
+            firstArticle.Title = article.Title;
+            firstArticle.ContentSummary = article.ContentSummary;
+            firstArticle.ContentMain = article.ContentMain;
+            firstArticle.CategoryId = article.Category.Id;
+            firstArticle.Picture = article.Picture;
 
             try
             {
