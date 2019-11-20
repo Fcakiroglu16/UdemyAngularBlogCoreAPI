@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace UdemyAngularBlogCore.API.Models
 {
@@ -19,7 +20,16 @@ namespace UdemyAngularBlogCore.API.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasAnnotation("ProductVersion", "2.2.4-servicing-10062");
+            //  modelBuilder.HasAnnotation("ProductVersion", "2.2.4-servicing-10062");
+
+            Category c1 = new Category() { Id = 1, Name = "Asp.Net Core" };
+            Category c2 = new Category() { Id = 2, Name = "Angular 8" };
+
+            modelBuilder.Entity<Category>().HasData(c1, c2);
+
+            modelBuilder.Entity<Article>().HasData(new Article() { Id = 1, CategoryId = 1, Title = "Makale 1", ContentMain = "Makale içerik 1", ContentSummary = "Makale özet 1", PublishDate = DateTime.Now });
+
+            modelBuilder.Entity<Article>().HasData(new Article() { Id = 2, CategoryId = 2, Title = "Makale 2", ContentMain = "Makale içerik 2", ContentSummary = "Makale özet 2", PublishDate = DateTime.Now });
 
             modelBuilder.Entity<Article>(entity =>
             {
